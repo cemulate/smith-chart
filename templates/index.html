@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+
+<title>Foundation 4</title>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+
+<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,400italic' rel='stylesheet' type='text/css'>
+
+<link rel="stylesheet" href="/static/foundation-5.0.2/css/foundation.css">
+<script src="/static/foundation-5.0.2/js/vendor/custom.modernizr.js"></script>
+
+<script src="/static/Complex.js"></script>
+<script src="/static/paper-0.9.12/paper.js"></script>
+<script src="/static/CoordinateSystem.js"></script>
+<script src="/static/SmithChart.js"></script>
+
+<style>
+	body {
+	    font-family: "Open Sans", sans-serif;
+	}
+
+	input.selection-values {
+		font-size: 24px;
+		height:50px;
+	}
+
+	div.selection-values-markup {
+		height: 50px;
+	}
+
+	div.selection-values-markup > span {
+		height: 50px;
+		line-height: 50px;
+	}
+
+</style>
+
+<script>
+	
+	$(document).ready(function() {
+
+		$(window).trigger("resize")
+
+		paper.setup($("#paperSurface").get(0))
+
+		app = new SmithChart($("#paperSurface").width(), $("#paperSurface").height(), {
+			stateUpdated: updatePanel
+		})
+
+		$("#text-gamma-i,#text-gamma-r").change(function (event) {
+
+			var r = parseFloat($("#text-gamma-r").val())
+			var i = parseFloat($("#text-gamma-i").val())
+
+			app.setSelectionByGamma(new Complex(r, i))
+
+			updatePanel()
+
+		})
+
+		$("#text-z-r,#text-z-i").change(function (event) {
+
+			var r = parseFloat($("#text-z-r").val())
+			var i = parseFloat($("#text-z-i").val())
+
+			app.setSelectionByZ(new Complex(r, i))
+
+			updatePanel()
+
+		})
+
+	})
+
+	function updatePanel () {
+
+		console.log("updating")
+
+		if (app.selection == null) {
+			$(".selection-values").css("color", "lightgray")
+
+			$("#text-gamma-r").val(app.cursor.gamma.r.toFixed(2))
+			$("#text-gamma-i").val(app.cursor.gamma.i.toFixed(2))
+			$("#text-z-r").val(app.cursor.z.r.toFixed(2))
+			$("#text-z-i").val(app.cursor.z.i.toFixed(2))
+
+		} else {
+			$(".selection-values").css("color", "black")
+
+			$("#text-gamma-r").val(app.selection.gamma.r.toFixed(2))
+			$("#text-gamma-i").val(app.selection.gamma.i.toFixed(2))
+			$("#text-z-r").val(app.selection.z.r.toFixed(2))
+			$("#text-z-i").val(app.selection.z.i.toFixed(2))
+		}
+
+	}
+
+	$(window).resize(function () {
+
+		$("#paperSurface").height($("#paperSurface").width() - 150)
+
+	})
+
+</script>
+
+</head>
+
+
+<body>
+
+	<div class="large-7 columns">
+		<canvas id="paperSurface" style="width:100%">
+			
+		</canvas>
+	</div>
+
+	<div class="large-5 columns">
+		
+		<h2>Smith Chart</h2>
+		<hr />
+
+		<div class="panel">
+			
+			<form>
+				<div class="row">
+					<div class="large-4 columns">
+						<p>Reflection Coefficent (Gamma)</p>
+					</div>
+					<div class="large-4 columns">
+						<div class="row collapse">
+							<div class="large-10 columns">
+								<input class="selection-values" id="text-gamma-r" type="text" placeholder="----" />
+							</div>
+							<div class="large-2 columns selection-values-markup">
+								<span class="postfix">+</span>
+							</div>
+						</div>
+					</div>
+					<div class="large-4 columns">
+						<div class="row collapse">
+							<div class="large-2 columns selection-values-markup">
+								<span class="prefix"><strong>j</strong></span>
+							</div>
+							<div class="large-10 columns">
+								<input class="selection-values" id="text-gamma-i" type="text" placeholder="----" />
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="large-4 columns">
+						<p>Normalized Load Impedance (z)</p>
+					</div>
+					<div class="large-4 columns">
+						<div class="row collapse">
+							<div class="large-10 columns">
+								<input class="selection-values" id="text-z-r" type="text" placeholder="----" />
+							</div>
+							<div class="large-2 columns selection-values-markup">
+								<span class="postfix">+</span>
+							</div>
+						</div>
+					</div>
+					<div class="large-4 columns">
+						<div class="row collapse">
+							<div class="large-2 columns selection-values-markup">
+								<span class="prefix"><strong>j</strong></span>
+							</div>
+							<div class="large-10 columns">
+								<input class="selection-values" id="text-z-i" type="text" placeholder="----" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+
+			<hr />
+
+		</div>
+	</div>
+
+
+	<script src="/static/foundation-5.0.2/js/foundation.min.js"></script>
+
+	<script>
+		$(document).foundation();
+ 	</script>
+
+
+</body>
+</html>

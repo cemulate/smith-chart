@@ -1,0 +1,7 @@
+venv
+*.pyc
+
+
+*.sublime-project
+*.sublime-workspace
+*.layout
