@@ -91,3 +91,75 @@ CoordinateSystem.prototype.inverseTransform = function(point) {
     var inv = this.matrix.inverted()
     return inv.transform(point)
 }
+
+
+
+// A convenience function provided along with the class, since it's a rather base functionality
+// This takes a coordinate system object and draws a nice coordinate plane on the chosen layer
+
+function drawCoordinatePlane(coordinateSystem, layer, options) {
+
+    layer.activate()
+    layer.removeChildren(0)
+
+    var cs = coordinateSystem
+    var width = cs.maxx - cs.minx
+    var height = cs.maxy - cs.miny
+
+    var xline = new paper.Path.Line(new paper.Point(cs.minx, 0), new paper.Point(cs.maxx, 0))
+    xline.strokeWidth = 2.5
+    xline.opacity = 0.6
+    xline.strokeColor = "black"
+
+    var yline = new paper.Path.Line(new paper.Point(0, cs.miny), new paper.Point(0, cs.maxy))
+    yline.strokeWidth = 2.5
+    yline.opacity = 0.6
+    yline.strokeColor = "black"
+
+    var doBorder = ('border' in options) ? options.border : false
+    if (doBorder) {
+        var border = new paper.Path.Rectangle(new paper.Point(cs.minx, cs.miny), new paper.Size(width, height))
+        border.strokeColor = "black"
+        border.opacity = 0.5
+        border.strokeWidth = 10.0
+    }
+
+    var spaceX = ('x_interval' in options) ? options.x_interval : (cs.maxx - cs.minx) / 10 || 1
+    var spaceY = ('y_interval' in options) ? options.y_interval : (cs.maxy - cs.miny) / 10 || 1
+
+    var line = null
+    var x = 0
+    for (x = 0; x < cs.maxx; x = x + spaceX) {
+        line = new paper.Path.Line(new paper.Point(x, cs.miny), new paper.Point(x, cs.maxy))
+        line.strokeWidth = 2.0
+        line.opacity = 0.2
+        line.strokeColor = "black"
+    }
+
+    for (x = 0; x > cs.minx; x = x - spaceX) {
+        line = new paper.Path.Line(new paper.Point(x, cs.miny), new paper.Point(x, cs.maxy))
+        line.strokeWidth = 2.0
+        line.opacity = 0.2
+        line.strokeColor = "black"
+    }
+
+    var y = 0
+    for (y = 0; y < cs.maxy; y = y + spaceY) {
+        line = new paper.Path.Line(new paper.Point(cs.minx, y), new paper.Point(cs.maxx, y))
+        line.strokeWidth = 2.0
+        line.opacity = 0.2
+        line.strokeColor = "black"
+    }
+
+    for (y = 0; y > cs.miny; y = y - spaceY) {
+        line = new paper.Path.Line(new paper.Point(cs.minx, y), new paper.Point(cs.maxx, y))
+        line.strokeWidth = 2.0
+        line.opacity = 0.2
+        line.strokeColor = "black"
+    }
+
+    layer.setMatrix(cs.matrix)
+
+    paper.view.draw()
+
+}

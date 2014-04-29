@@ -1,7 +1,8 @@
 function Complex(config, imag) {
 	
 	// Complex(real, imag)
-	// Complex(dict)
+	// Complex({real: <num>, imag: <num>})
+	// Complex({angle: <num>, mag: <num>})
 
 	if (typeof(config) == "number") {
 		this.r = config
@@ -49,4 +50,8 @@ Complex.prototype.inv = function() {
 		angle: -this.angle(),
 		mag: 1 / this.mag()
 	})
+}
+
+Complex.prototype.copy = function() {
+	return new Complex(this.r, this.i)
 }

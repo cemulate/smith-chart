@@ -3,15 +3,7 @@ function isWhole(num) {
     return ((i < 0.0000001) || (i > 0.9999999))
 }
 
-function getZ(gamma) {
-    var one = new Complex(1, 0)
-    return gamma.add(one).mul(gamma.neg().add(one).inv()) // Z = (1 + gamma) / (1 - gamma)
-}
 
-function getGamma(z) {
-    var one = new Complex(1, 0)
-    return z.add(one.neg()).mul(z.add(one).inv()) // gamma = (z - 1) / (z + 1)
-}
 
 function SmithChart(surface_width, surface_height, callbacks) {
 
@@ -22,12 +14,11 @@ function SmithChart(surface_width, surface_height, callbacks) {
 
     this.bgLayer = new paper.Layer()
     this.staticGroup = new paper.Group()
-    this._drawBgLayer()
+    this._drawBgLayer(this.bgLayer)
 
-    this.cursor = {
-        gamma: new Complex(0, 0),
-        z: new Complex(0, 0)
-    }
+    this.chain = []
+
+    this.cursor = new Selection()
     this.cursor_display = false
     this.selection = null
 
@@ -36,7 +27,7 @@ function SmithChart(surface_width, surface_height, callbacks) {
 
     this.cursorLayer = new paper.Layer()
     this.dynamicGroup = new paper.Group()
-    this.drawCursorLayer()
+    this.drawCursorLayer(this.cursorLayer)
 
     // this.mainLayer = new paper.Layer()
     // this.staticGroup = new paper.Group()
@@ -44,21 +35,19 @@ function SmithChart(surface_width, surface_height, callbacks) {
 }
 
 SmithChart.prototype.setSelectionByGamma = function(gamma) {
-    this.selection = {
-        gamma: gamma,
-        z: getZ(gamma)
-    }
+    this.selection = new Selection({
+        gamma: gamma
+    })
 
-    this.drawCursorLayer()
+    this.drawCursorLayer(this.cursorLayer)
 }
 
 SmithChart.prototype.setSelectionByZ = function(z) {
-    this.selection = {
-        gamma: getGamma(z),
+    this.selection = new Selection({
         z: z
-    }
+    })
 
-    this.drawCursorLayer()
+    this.drawCursorLayer(this.cursorLayer)
 }
 
 SmithChart.prototype._configureTool = function () {
@@ -74,8 +63,7 @@ SmithChart.prototype._configureTool = function () {
 
             self.cursor_display = true
             
-            self.cursor.gamma = g
-            self.cursor.z = getZ(g)
+            self.cursor.setGamma(g) 
             if (self.callbacks.stateUpdated) {
                 self.callbacks.stateUpdated()
             }
@@ -83,16 +71,13 @@ SmithChart.prototype._configureTool = function () {
             self.cursor_display = false
         }
 
-        self.drawCursorLayer()
+        self.drawCursorLayer(self.cursorLayer)
     }
 
 
     this.mouseTool.onMouseDown = function(event) {
         if (self.selection == null) {
-            self.selection = {
-                gamma: self.cursor.gamma,
-                z: self.cursor.z
-            }
+            self.selection = self.cursor.copy()
         } else {
             self.selection = null
         }
@@ -101,15 +86,15 @@ SmithChart.prototype._configureTool = function () {
             self.callbacks.stateUpdated()
         }
 
-        self.drawCursorLayer()
+        self.drawCursorLayer(self.cursorLayer)
     }
 
 }
 
-SmithChart.prototype._drawBgLayer = function () {
+SmithChart.prototype._drawBgLayer = function (layer) {
 
-    this.bgLayer.activate()
-    this.bgLayer.removeChildren(0)
+    layer.activate()
+    layer.removeChildren(0)
 
     var cs = this.coordinateSystem
 
@@ -145,18 +130,18 @@ SmithChart.prototype._drawBgLayer = function () {
 
     this.staticGroup.clipped = true
 
-    this.bgLayer.addChild(this.staticGroup)
+    layer.addChild(this.staticGroup)
 
 
-    this.bgLayer.setMatrix(this.coordinateSystem.matrix)
+    layer.setMatrix(this.coordinateSystem.matrix)
     paper.project.view.draw()
 
 
 }
 
-SmithChart.prototype.drawCursorLayer = function () {
-    this.cursorLayer.activate()
-    this.cursorLayer.removeChildren(0)
+SmithChart.prototype.drawCursorLayer = function (layer) {
+    layer.activate()
+    layer.removeChildren(0)
 
     this.dynamicGroup.removeChildren(0)
 
@@ -200,8 +185,8 @@ SmithChart.prototype.drawCursorLayer = function () {
 
     this.dynamicGroup.clipped = true
 
-    this.cursorLayer.addChild(this.dynamicGroup)
-    this.cursorLayer.setMatrix(this.coordinateSystem.matrix)
+    layer.addChild(this.dynamicGroup)
+    layer.setMatrix(this.coordinateSystem.matrix)
 
     paper.project.view.draw()
 
